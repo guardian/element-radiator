@@ -1,0 +1,297 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+
+  <title>Demo Radiator</title>
+
+  <!-- 1. Load platform support before any code that touches the DOM. -->
+  <script src="bower_components/platform/platform.js"></script>
+  <link rel="stylesheet" href="styles/main.css">
+
+  <!-- 2. Load the components -->
+  <link rel="import" href="bower_components/time-now/time-now.html">
+  <link rel="import" href="bower_components/time-range/time-range.html">
+  <link rel="import" href="bower_components/aws-config/aws-config.html">
+  <link rel="import" href="bower_components/aws-identity/aws-identity.html">
+  <link rel="import" href="bower_components/aws-cloudwatch/aws-cloudwatch.html">
+  <link rel="import" href="bower_components/graphite-metrics/graphite-metrics.html">
+  <link rel="import" href="bower_components/element-radiator/aws-latency.html">
+  <link rel="import" href="bower_components/element-radiator/aws-requests.html">
+  <link rel="import" href="bower_components/element-radiator/aws-counts.html">
+  <link rel="import" href="bower_components/element-radiator/var-init.html">
+
+  <!-- 3. Load third-party components -->
+  <link rel="import" href="bower_components/paper-radio-group/paper-radio-group.html">
+  <link rel="import" href="bower_components/paper-radio-button/paper-radio-button.html">
+  <link rel="import" href="bower_components/google-chart/google-chart.html">
+
+</head>
+<body>
+
+  <h1>Demo Radiator</h1>
+
+  <template is="auto-binding">
+    <link rel="stylesheet" href="styles/app.css">
+
+    <!-- need to bootstrap value early -->
+    <var-init var="{{hours}}" value="1"></var-init>
+
+    <!-- auto-refresh every minute -->
+    <time-now sink="{{timeRangeEnd}}" refresh="10000"></time-now>
+    <time-range class="time-range" start="{{timeRangeStart}}" end="{{timeRangeEnd}}" hours="{{hours}}"></time-range>
+
+    <paper-radio-group selected="{{hours}}">
+      <paper-radio-button name="1" label="1h"></paper-radio-button>
+      <paper-radio-button name="3" label="3h"></paper-radio-button>
+      <paper-radio-button name="12" label="12h"></paper-radio-button>
+      <paper-radio-button name="24" label="1d"></paper-radio-button>
+      <paper-radio-button name="168" label="1w"></paper-radio-button>
+    </paper-radio-group>
+
+
+    <section class="project">
+      <h1>Media Service</h1>
+
+
+      <template if="{{! awsMedia}}">
+        <aws-identity accountId="YOUR_ACCOUNT_ID" roleName="testWebIdRole" region="eu-west-1" sink="{{awsMedia}}">
+          <google-signin clientId="YOUR_APP_ID.apps.googleusercontent.com"
+                         scopes="https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email">
+          </google-signin>
+        </aws-identity>
+      </template>
+
+
+      <!-- Don't show until we have a config -->
+      <template if="{{awsMedia}}">
+
+        <h2>Media API</h2>
+
+        <aws-latency config="{{awsMedia}}"
+                     startTime="{{timeRangeStart}}"
+                     endTime="{{timeRangeEnd}}"
+                     loadBalancerName="MEDIA_API_LB">
+        </aws-latency>
+
+        <aws-requests config="{{awsMedia}}"
+                      startTime="{{timeRangeStart}}"
+                      endTime="{{timeRangeEnd}}"
+                      loadBalancerName="MEDIA_API_LB">
+        </aws-requests>
+
+
+        <h2>Image loader</h2>
+
+        <aws-latency config="{{awsMedia}}"
+                     startTime="{{timeRangeStart}}"
+                     endTime="{{timeRangeEnd}}"
+                     loadBalancerName="IMAGE_LOADER_LB">
+        </aws-latency>
+
+        <aws-requests config="{{awsMedia}}"
+                      startTime="{{timeRangeStart}}"
+                      endTime="{{timeRangeEnd}}"
+                      loadBalancerName="IMAGE_LOADER_LB">
+        </aws-requests>
+
+
+        <h2>Workers</h2>
+
+        <aws-counts config="{{awsMedia}}"
+                    namespace="PROD/Thrall"
+                    metricname="IndexedImages"
+                    startTime="{{timeRangeStart}}"
+                    endtime="{{timeRangeEnd}}"
+                    title="Indexed images">
+        </aws-counts>
+
+        <aws-counts config="{{awsMedia}}"
+                    namespace="PROD/Thrall"
+                    metricname="DeletedImages"
+                    startTime="{{timeRangeStart}}"
+                    endtime="{{timeRangeEnd}}"
+                    title="Deleted images">
+        </aws-counts>
+
+      </template>
+
+    </section>
+
+
+    <section class="project">
+      <h1>Tag API</h1>
+
+
+      <!-- Latency -->
+
+      <graphite-metrics baseUri="https://graphite.example.com"
+                        target="TARGET.sum"
+                        since="{{timeRangeStart}}"
+                        until="{{timeRangeEnd}}"
+                        resolution="120"
+                        sink="{{graphiteTagApiLatencyAvg}}">
+      </graphite-metrics>
+
+      <google-chart type="line"
+                    height="120px"
+                    width="100%"
+                    options='{
+                      "title": "Latency (ms)",
+                      "curveType": "function",
+                      "vAxes": [{ "viewWindow": { "min": 0 }}],
+                      "series": [
+                        {"color": "black"}
+                      ]
+                    }'
+                    cols='[{"label":"Time", "type":"datetime"},
+                           {"label":"Avg",  "type":"number"}]'
+                    rows="{{graphiteTagApiLatencyAvg}}">
+      </google-chart>
+
+
+      <!-- Request rate -->
+
+      <graphite-metrics baseUri="https://graphite.example.com"
+                        target="averageSeries(TARGET.sum)"
+                        since="{{timeRangeStart}}"
+                        until="{{timeRangeEnd}}"
+                        resolution="120"
+                        sink="{{graphiteTagApiRequestsNum}}">
+      </graphite-metrics>
+
+      <google-chart type="area"
+                    height="120px"
+                    width="100%"
+                    options='{
+                      "title": "Request rate",
+                      "vAxes": [{ "viewWindow": { "min": 0 }}]
+                    }'
+                    cols='[{"label":"Time", "type":"datetime"},
+                           {"label":"200s", "type":"number"}]'
+                    rows="{{graphiteTagApiRequestsNum}}">
+      </google-chart>
+
+
+      <h2>Tag store refreshes</h2>
+
+      <graphite-metrics baseUri="https://graphite.example.com"
+                        target="TARGET.sum"
+                        since="{{timeRangeStart}}"
+                        until="{{timeRangeEnd}}"
+                        resolution="120"
+                        sink="{{graphiteTagApiR2LatencySum}}">
+      </graphite-metrics>
+
+      <google-chart type="line"
+                    height="120px"
+                    width="100%"
+                    options='{
+                      "title": "Latency (ms)",
+                      "curveType": "function",
+                      "vAxes": [{ "viewWindow": { "min": 0 }}],
+                      "series": [
+                        {"color": "black"}
+                      ]
+                    }'
+                    cols='[{"label":"Time", "type":"datetime"},
+                           {"label":"Sum",  "type":"number"}]'
+                    rows="{{graphiteTagApiR2LatencySum}}">
+      </google-chart>
+
+
+      <!-- Failed tag store refreshes -->
+
+      <graphite-metrics baseUri="https://graphite.example.com"
+                        target="TARGET.sum"
+                        since="{{timeRangeStart}}"
+                        until="{{timeRangeEnd}}"
+                        resolution="120"
+                        sink="{{graphiteTagApiR2FailureSum}}">
+      </graphite-metrics>
+
+      <google-chart type="line"
+                    height="120px"
+                    width="100%"
+                    options='{
+                      "title": "Failure count",
+                      "curveType": "function",
+                      "vAxes": [{ "viewWindow": { "min": 0 }}],
+                      "series": [
+                        {"color": "red"}
+                      ]
+                    }'
+                    cols='[{"label":"Time", "type":"datetime"},
+                           {"label":"Sum",  "type":"number"}]'
+                    rows="{{graphiteTagApiR2FailureSum}}">
+      </google-chart>
+
+    </section>
+
+
+    <section class="project">
+      <h1>Flexible Content</h1>
+
+
+      <h2>Composer $digest</h2>
+
+      <!-- Duration -->
+
+      <graphite-metrics baseUri="https://graphite.example.com"
+                        target="TARGET.sum"
+                        since="{{timeRangeStart}}"
+                        until="{{timeRangeEnd}}"
+                        resolution="120"
+                        sink="{{graphiteTagApiComposerDigestDurationSum}}">
+      </graphite-metrics>
+
+      <google-chart type="line"
+                    height="120px"
+                    width="100%"
+                    options='{
+                      "title": "Duration (ms)",
+                      "curveType": "function",
+                      "vAxes": [{ "viewWindow": { "min": 0 }}],
+                      "series": [
+                        {"color": "black"}
+                      ],
+                      "annotations": {"style": "line"}
+                    }'
+                    cols='[{"label":"Time", "type":"datetime"},
+                           {"label":"Avg",  "type":"number"}]'
+                    rows="{{graphiteTagApiComposerDigestDurationSum}}">
+      </google-chart>
+
+
+      <!-- Count -->
+
+      <graphite-metrics baseUri="https://graphite.example.com"
+                        target="averageSeries(TARGET.sum)"
+                        since="{{timeRangeStart}}"
+                        until="{{timeRangeEnd}}"
+                        resolution="120"
+                        sink="{{graphiteTagApiComposerDigestCountAvg}}">
+      </graphite-metrics>
+
+      <google-chart type="area"
+                    height="120px"
+                    width="100%"
+                    options='{
+                      "title": "Count",
+                      "vAxes": [{ "viewWindow": { "min": 0 }}],
+                      "series": [
+                        {"visibleInLegend": false}
+                      ]
+                    }'
+                    cols='[{"label":"Time",  "type":"datetime"},
+                           {"label":"Count", "type":"number"}]'
+                    rows="{{graphiteTagApiComposerDigestCountAvg}}">
+      </google-chart>
+
+    </section>
+
+  </template>
+
+
+</body>
+</html>
