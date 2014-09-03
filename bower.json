@@ -1,0 +1,21 @@
+{
+  "name": "element-radiator",
+  "version": "0.1.0",
+  "authors": [
+    "Sébastien Cevey <seb.cevey@theguardian.com>"
+  ],
+  "description": "Helper Polymer elements for building information radiators and monitoring dashboards",
+  "keywords": "radiator, monitoring, dashboard, polymer, web-components",
+  "license": "Apache-2",
+  "homepage": "https://github.com/guardian/element-radiator/",
+  "ignore": [
+    "**/.*"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#~0.3.4",
+    "polymer-test-tools": "Polymer/polymer-test-tools#~0.3.3",
+    "google-chart": "GoogleWebComponents/google-chart#~0.0.2",
+    "aws-cloudwatch": "guardian/element-aws-cloudwatch",
+    "time-series-zip": "guardian/element-time-series-zip"
+  }
+}

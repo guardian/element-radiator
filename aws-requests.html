@@ -1,0 +1,71 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/time-series-zip/time-series-zip.html">
+<link rel="import" href="../bower_components/aws-cloudwatch/aws-cloudwatch.html">
+<link rel="import" href="../bower_components/google-chart/google-chart.html">
+
+
+<polymer-element name="aws-requests"
+                 attributes="config startTime endTime loadBalancerName"
+                 noscript>
+  <template>
+
+    <aws-cloudwatch config="{{config}}"
+                    namespace="AWS/ELB"
+                    metricname="HTTPCode_Backend_2XX"
+                    starttime="{{startTime}}"
+                    endtime="{{endTime}}"
+                    resolution="60"
+                    statistics="sum"
+                    sink="{{requests200}}">
+      <aws-dimension name="LoadBalancerName" value="{{loadBalancerName}}" />
+    </aws-cloudwatch>
+
+    <aws-cloudwatch config="{{config}}"
+                    namespace="AWS/ELB"
+                    metricname="HTTPCode_Backend_4XX"
+                    starttime="{{startTime}}"
+                    endtime="{{endTime}}"
+                    resolution="60"
+                    statistics="sum"
+                    sink="{{requests400}}">
+      <aws-dimension name="LoadBalancerName" value="{{loadBalancerName}}" />
+    </aws-cloudwatch>
+
+    <aws-cloudwatch config="{{config}}"
+                    namespace="AWS/ELB"
+                    metricname="HTTPCode_Backend_5XX"
+                    starttime="{{startTime}}"
+                    endtime="{{endTime}}"
+                    resolution="60"
+                    statistics="sum"
+                    sink="{{requests500}}">
+      <aws-dimension name="LoadBalancerName" value="{{loadBalancerName}}" />
+    </aws-cloudwatch>
+
+    <time-series-zip input="{{ [ requests200.sum, requests400.sum, requests500.sum ] }}"
+                     sink="{{requestsZipped}}">
+    </time-series-zip>
+
+    <google-chart type="area"
+                  height="120px"
+                  width="100%"
+                  options='{
+                    "title": "Requests",
+                    "vAxes": [{ "viewWindow": { "min": 0 }},
+                              { "viewWindow": { "min": 0 }}],
+                    "series": [
+                      {"color": "#3366CC"},
+                      {"color": "yellow"},
+                      {"color": "red"}
+                    ]
+                  }'
+                  cols='[{"label":"Time", "type":"datetime"},
+                         {"label":"200s", "type":"number"},
+                         {"label":"400s", "type":"number"},
+                         {"label":"500s", "type":"number"}]'
+                  rows="{{requestsZipped}}">
+    </google-chart>
+
+  </template>
+</polymer-element>

@@ -1,0 +1,46 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/time-series-zip/time-series-zip.html">
+<link rel="import" href="../bower_components/aws-cloudwatch/aws-cloudwatch.html">
+<link rel="import" href="../bower_components/google-chart/google-chart.html">
+
+
+<polymer-element name="aws-latency"
+                 attributes="config startTime endTime loadBalancerName"
+                 noscript>
+  <template>
+    <aws-cloudwatch config="{{config}}"
+                    namespace="AWS/ELB"
+                    metricname="Latency"
+                    starttime="{{startTime}}"
+                    endtime="{{endTime}}"
+                    resolution="60"
+                    statistics="average maximum"
+                    sink="{{latencyData}}">
+      <aws-dimension name="LoadBalancerName"
+                     value="{{loadBalancerName}}" />
+    </aws-cloudwatch>
+
+    <time-series-zip input="{{ [ latencyData.maximum, latencyData.average ] }}"
+                     sink="{{latencyDataZipped}}">
+    </time-series-zip>
+
+    <google-chart type="line"
+                  height="120px"
+                  width="100%"
+                  options='{
+                    "title": "Latency (s)",
+                    "curveType": "function",
+                    "vAxes": [{ "viewWindow": { "min": 0 }}],
+                    "series": [
+                      {"color": "#ffaaaa"},
+                      {"color": "black"}
+                    ]
+                  }'
+                  cols='[{"label":"Time", "type":"datetime"},
+                         {"label":"Max",  "type":"number"},
+                         {"label":"Avg",  "type":"number"}]'
+                  rows="{{latencyDataZipped}}">
+    </google-chart>
+  </template>
+</polymer-element>

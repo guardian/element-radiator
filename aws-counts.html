@@ -1,0 +1,29 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/aws-cloudwatch/aws-cloudwatch.html">
+<link rel="import" href="../bower_components/google-chart/google-chart.html">
+
+
+<polymer-element name="aws-counts"
+                 attributes="config namespace metricname startTime endTime title"
+                 noscript>
+  <template>
+      <aws-cloudwatch config="{{config}}"
+                      namespace="{{namespace}}"
+                      metricname="{{metricname}}"
+                      starttime="{{startTime}}"
+                      endtime="{{endTime}}"
+                      resolution="60"
+                      statistics="sum"
+                      sink="{{countData}}">
+      </aws-cloudwatch>
+
+      <google-chart type="column"
+                    height="120px"
+                    width="100%"
+                    options='{{ { title: title, vAxes: [{ viewWindow: { min: 0 } }], series: [{visibleInLegend: false}] } }}'
+                    cols='{{ [{"label": "Time", "type": "datetime"}, {"label": title, "type": "number"}] }}'
+                    rows="{{countData.sum}}">
+      </google-chart>
+  </template>
+</polymer-element>

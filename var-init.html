@@ -1,0 +1,11 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<polymer-element name="var-init" attributes="var value">
+  <script>
+    Polymer('var-init', {
+      ready: function() {
+        this.var = this.value;
+      }
+    });
+  </script>
+</polymer-element>
