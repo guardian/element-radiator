@@ -5,7 +5,7 @@
 
 
 <polymer-element name="aws-counts"
-                 attributes="config namespace metricname startTime endTime title"
+                 attributes="config namespace metricname startTime endTime titleText"
                  noscript>
   <template>
       <aws-cloudwatch config="{{config}}"
@@ -21,8 +21,8 @@
       <google-chart type="column"
                     height="120px"
                     width="100%"
-                    options='{{ { title: title, vAxes: [{ viewWindow: { min: 0 } }], series: [{visibleInLegend: false}] } }}'
-                    cols='{{ [{"label": "Time", "type": "datetime"}, {"label": title, "type": "number"}] }}'
+                    options='{{ { title: titleText, vAxes: [{ viewWindow: { min: 0 } }], series: [{visibleInLegend: false}] } }}'
+                    cols='{{ [{"label": "Time", "type": "datetime"}, {"label": titleText, "type": "number"}] }}'
                     rows="{{countData.sum}}">
       </google-chart>
   </template>
