@@ -5,8 +5,7 @@
 
 
 <polymer-element name="aws-counts"
-                 attributes="config namespace metricname startTime endTime titleText"
-                 noscript>
+                 attributes="config namespace metricname startTime endTime titleText">
   <template>
       <style>
         google-chart {
@@ -26,9 +25,28 @@
       </aws-cloudwatch>
 
       <google-chart type="column"
-                    options='{{ { title: titleText, vAxes: [{ viewWindow: { min: 0 } }], series: [{visibleInLegend: false}], hAxis: { viewWindow: {min: startTime, max: endTime} } } }}'
+                    options="{{chartOptions}}"
                     cols='{{ [{"label": "Time", "type": "datetime"}, {"label": titleText, "type": "number"}] }}'
                     rows="{{countData.sum}}">
       </google-chart>
   </template>
+
+  <script>
+    // Note: this really could be inline in the template, but {{ expr }}
+    // don't support newlines so the options become unreadable...
+    Polymer('aws-counts', {
+      observe: {
+        'startTime': 'ready',
+        'endTime': 'ready',
+      },
+      ready: function() {
+        this.chartOptions = {
+          "title": titleText,
+          "vAxes": [{ "viewWindow": { min: 0 } }],
+          "series": [{"visibleInLegend": false}],
+          "hAxis": { "viewWindow": {"min": this.startTime, "max": this.endTime}}
+        };
+      }
+    });
+  </script>
 </polymer-element>

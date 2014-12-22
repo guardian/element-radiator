@@ -6,8 +6,7 @@
 
 
 <polymer-element name="aws-latency"
-                 attributes="config startTime endTime loadBalancerName"
-                 noscript>
+                 attributes="config startTime endTime loadBalancerName">
   <template>
     <style>
       google-chart {
@@ -33,19 +32,34 @@
     </time-series-zip>
 
     <google-chart type="line"
-                  options='{
-                    "title": "Latency (s)",
-                    "curveType": "function",
-                    "vAxes": [{ "viewWindow": { "min": 0 }}],
-                    "series": [
-                      {"color": "#ffaaaa"},
-                      {"color": "black"}
-                    ]
-                  }'
+                  options="{{chartOptions}}"
                   cols='[{"label":"Time", "type":"datetime"},
                          {"label":"Max",  "type":"number"},
                          {"label":"Avg",  "type":"number"}]'
                   rows="{{latencyDataZipped}}">
     </google-chart>
   </template>
+
+  <script>
+    // Note: this really could be inline in the template, but {{ expr }}
+    // don't support newlines so the options become unreadable...
+    Polymer('aws-latency', {
+      observe: {
+        'startTime': 'ready',
+        'endTime': 'ready',
+      },
+      ready: function() {
+        this.chartOptions = {
+          "title": "Latency (s)",
+          "curveType": "function",
+          "vAxes": [{ "viewWindow": { "min": 0 }}],
+          "series": [
+            {"color": "#ffaaaa"},
+            {"color": "black"}
+          ],
+          "hAxis": { "viewWindow": {"min": this.startTime, "max": this.endTime }}
+        };
+      }
+    });
+  </script>
 </polymer-element>

@@ -6,8 +6,7 @@
 
 
 <polymer-element name="aws-requests"
-                 attributes="config startTime endTime loadBalancerName"
-                 noscript>
+                 attributes="config startTime endTime loadBalancerName">
   <template>
     <style>
       google-chart {
@@ -54,16 +53,7 @@
     </time-series-zip>
 
     <google-chart type="area"
-                  options='{
-                    "title": "Requests",
-                    "vAxes": [{ "viewWindow": { "min": 0 }},
-                              { "viewWindow": { "min": 0 }}],
-                    "series": [
-                      {"color": "#3366CC"},
-                      {"color": "yellow"},
-                      {"color": "red"}
-                    ]
-                  }'
+                  options="{{chartOptions}}"
                   cols='[{"label":"Time", "type":"datetime"},
                          {"label":"200s", "type":"number"},
                          {"label":"400s", "type":"number"},
@@ -72,4 +62,28 @@
     </google-chart>
 
   </template>
+
+  <script>
+    // Note: this really could be inline in the template, but {{ expr }}
+    // don't support newlines so the options become unreadable...
+    Polymer('aws-requests', {
+      observe: {
+        'startTime': 'ready',
+        'endTime': 'ready',
+      },
+      ready: function() {
+        this.chartOptions = {
+          "title": "Requests",
+          "vAxes": [{ "viewWindow": { "min": 0 }},
+                    { "viewWindow": { "min": 0 }}],
+          "series": [
+            {"color": "#3366CC"},
+            {"color": "yellow"},
+            {"color": "red"}
+          ],
+          "hAxis": { "viewWindow": {"min": this.startTime, "max": this.endTime }}
+        };
+      }
+    });
+  </script>
 </polymer-element>
