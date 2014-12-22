@@ -36,12 +36,13 @@
     // don't support newlines so the options become unreadable...
     Polymer('aws-counts', {
       observe: {
+        'titleText': 'ready',
         'startTime': 'ready',
         'endTime': 'ready',
       },
       ready: function() {
         this.chartOptions = {
-          "title": titleText,
+          "title": this.titleText,
           "vAxes": [{ "viewWindow": { min: 0 } }],
           "series": [{"visibleInLegend": false}],
           "hAxis": { "viewWindow": {"min": this.startTime, "max": this.endTime}}
