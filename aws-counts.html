@@ -21,7 +21,7 @@
       <google-chart type="column"
                     height="120px"
                     width="100%"
-                    options='{{ { title: titleText, vAxes: [{ viewWindow: { min: 0 } }], series: [{visibleInLegend: false}] } }}'
+                    options='{{ { title: titleText, vAxes: [{ viewWindow: { min: 0 } }], series: [{visibleInLegend: false}], hAxis: { viewWindow: {min: startTime, max: endTime} } } }}'
                     cols='{{ [{"label": "Time", "type": "datetime"}, {"label": titleText, "type": "number"}] }}'
                     rows="{{countData.sum}}">
       </google-chart>
