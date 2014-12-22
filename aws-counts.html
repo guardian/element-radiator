@@ -8,6 +8,13 @@
                  attributes="config namespace metricname startTime endTime titleText"
                  noscript>
   <template>
+      <style>
+        google-chart {
+          height: 120px;
+          width: 100%;
+        }
+      </style>
+
       <aws-cloudwatch config="{{config}}"
                       namespace="{{namespace}}"
                       metricname="{{metricname}}"
@@ -19,8 +26,6 @@
       </aws-cloudwatch>
 
       <google-chart type="column"
-                    height="120px"
-                    width="100%"
                     options='{{ { title: titleText, vAxes: [{ viewWindow: { min: 0 } }], series: [{visibleInLegend: false}], hAxis: { viewWindow: {min: startTime, max: endTime} } } }}'
                     cols='{{ [{"label": "Time", "type": "datetime"}, {"label": titleText, "type": "number"}] }}'
                     rows="{{countData.sum}}">

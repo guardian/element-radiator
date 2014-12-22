@@ -9,6 +9,13 @@
                  attributes="config startTime endTime loadBalancerName"
                  noscript>
   <template>
+    <style>
+      google-chart {
+        height: 120px;
+        width: 100%;
+      }
+    </style>
+
     <aws-cloudwatch config="{{config}}"
                     namespace="AWS/ELB"
                     metricname="Latency"
@@ -26,8 +33,6 @@
     </time-series-zip>
 
     <google-chart type="line"
-                  height="120px"
-                  width="100%"
                   options='{
                     "title": "Latency (s)",
                     "curveType": "function",

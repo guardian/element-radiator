@@ -9,6 +9,12 @@
                  attributes="config startTime endTime loadBalancerName"
                  noscript>
   <template>
+    <style>
+      google-chart {
+        height: 120px;
+        width: 100%;
+      }
+    </style>
 
     <aws-cloudwatch config="{{config}}"
                     namespace="AWS/ELB"
@@ -48,8 +54,6 @@
     </time-series-zip>
 
     <google-chart type="area"
-                  height="120px"
-                  width="100%"
                   options='{
                     "title": "Requests",
                     "vAxes": [{ "viewWindow": { "min": 0 }},
