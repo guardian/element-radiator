@@ -12,9 +12,9 @@
     "**/.*"
   ],
   "dependencies": {
-    "polymer": "~0.5.2",
-    "polymer-test-tools": "Polymer/polymer-test-tools#~0.5.2",
-    "google-chart": "~0.2.1",
+    "polymer": "^0.5.2",
+    "polymer-test-tools": "Polymer/polymer-test-tools#^0.5.2",
+    "google-chart": "^0.2.1",
     "aws-cloudwatch": "guardian/element-aws-cloudwatch",
     "time-series-zip": "guardian/element-time-series-zip"
   }
