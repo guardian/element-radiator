@@ -64,25 +64,19 @@
   </template>
 
   <script>
-    // Note: this really could be inline in the template, but {{ expr }}
-    // don't support newlines so the options become unreadable...
     Polymer('aws-requests', {
-      observe: {
-        'startTime': 'ready',
-        'endTime': 'ready',
-      },
-      ready: function() {
-        this.chartOptions = {
-          "title": "Requests",
-          "vAxes": [{ "viewWindow": { "min": 0 }},
-                    { "viewWindow": { "min": 0 }}],
-          "series": [
-            {"color": "#3366CC"},
-            {"color": "yellow"},
-            {"color": "red"}
-          ],
-          "hAxis": { "viewWindow": {"min": this.startTime, "max": this.endTime }}
-        };
+      computed: {
+        chartOptions: '{' +
+          'title: "Requests",' +
+          'vAxes: [{viewWindow: { min: 0 }},' +
+                  '{viewWindow: { min: 0 }}],' +
+          'series: [' +
+            '{color: "#3366CC"},' +
+            '{color: "yellow"},' +
+            '{color: "red"}' +
+          '],' +
+          'hAxis: { viewWindow: {min: startTime, max: endTime }}' +
+        '}'
       }
     });
   </script>

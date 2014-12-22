@@ -32,21 +32,14 @@
   </template>
 
   <script>
-    // Note: this really could be inline in the template, but {{ expr }}
-    // don't support newlines so the options become unreadable...
     Polymer('aws-counts', {
-      observe: {
-        'titleText': 'ready',
-        'startTime': 'ready',
-        'endTime': 'ready',
-      },
-      ready: function() {
-        this.chartOptions = {
-          "title": this.titleText,
-          "vAxes": [{ "viewWindow": { min: 0 } }],
-          "series": [{"visibleInLegend": false}],
-          "hAxis": { "viewWindow": {"min": this.startTime, "max": this.endTime}}
-        };
+      computed: {
+        chartOptions: '{' +
+          'title: titleText,' +
+          'vAxes: [{viewWindow: { min: 0 } }],' +
+          'series: [{visibleInLegend: false}],' +
+          'hAxis: {viewWindow: {min: startTime, max: endTime}}' +
+        '}'
       }
     });
   </script>

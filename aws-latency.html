@@ -41,24 +41,18 @@
   </template>
 
   <script>
-    // Note: this really could be inline in the template, but {{ expr }}
-    // don't support newlines so the options become unreadable...
     Polymer('aws-latency', {
-      observe: {
-        'startTime': 'ready',
-        'endTime': 'ready',
-      },
-      ready: function() {
-        this.chartOptions = {
-          "title": "Latency (s)",
-          "curveType": "function",
-          "vAxes": [{ "viewWindow": { "min": 0 }}],
-          "series": [
-            {"color": "#ffaaaa"},
-            {"color": "black"}
-          ],
-          "hAxis": { "viewWindow": {"min": this.startTime, "max": this.endTime }}
-        };
+      computed: {
+        chartOptions: '{' +
+          'title: "Latency (s)",' +
+          'curveType: "function",' +
+          'vAxes: [{viewWindow: { min: 0 }}],' +
+          'series: [' +
+            '{color: "#ffaaaa"},' +
+            '{color: "black"}' +
+          '],' +
+          'hAxis: { viewWindow: {min: startTime, max: endTime }}' +
+        '}'
       }
     });
   </script>
