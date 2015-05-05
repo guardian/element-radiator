@@ -5,7 +5,7 @@
 
 
 <polymer-element name="aws-counts"
-                 attributes="config namespace metricname startTime endTime titleText">
+                 attributes="config namespace metricname startTime endTime titleText color">
   <template>
       <style>
         google-chart {
@@ -37,7 +37,7 @@
         chartOptions: '{' +
           'title: titleText,' +
           'vAxes: [{viewWindow: { min: 0 } }],' +
-          'series: [{visibleInLegend: false}],' +
+          'series: [{visibleInLegend: false, color: color}],' +
           'hAxis: {viewWindow: {min: startTime, max: endTime}}' +
         '}'
       }
