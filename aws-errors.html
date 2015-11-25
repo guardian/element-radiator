@@ -1,0 +1,69 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../time-series-zip/time-series-zip.html">
+<link rel="import" href="../aws-cloudwatch/aws-cloudwatch.html">
+<link rel="import" href="../google-chart/google-chart.html">
+
+  <polymer-element name="aws-errors"
+                 attributes="config startTime endTime loadBalancerName">
+  <template>
+    <style>
+      google-chart {
+        height: 120px;
+        width: 100%;
+      }
+    </style>
+
+    <aws-cloudwatch config="{{config}}"
+                    namespace="AWS/ELB"
+                    metricname="HTTPCode_Backend_4XX"
+                    starttime="{{startTime}}"
+                    endtime="{{endTime}}"
+                    resolution="60"
+                    statistics="sum"
+                    sink="{{requests400}}">
+      <aws-dimension name="LoadBalancerName" value="{{loadBalancerName}}" />
+    </aws-cloudwatch>
+
+    <aws-cloudwatch config="{{config}}"
+                    namespace="AWS/ELB"
+                    metricname="HTTPCode_Backend_5XX"
+                    starttime="{{startTime}}"
+                    endtime="{{endTime}}"
+                    resolution="60"
+                    statistics="sum"
+                    sink="{{requests500}}">
+      <aws-dimension name="LoadBalancerName" value="{{loadBalancerName}}" />
+    </aws-cloudwatch>
+
+    <time-series-zip input="{{ [ requests400.sum, requests500.sum ] }}"
+                     sink="{{requestsZipped}}">
+    </time-series-zip>
+
+    <google-chart type="area"
+                  options="{{chartOptions}}"
+                  cols='[{"label":"Time", "type":"datetime"},
+                         {"label":"400s", "type":"number"},
+                         {"label":"500s", "type":"number"}]'
+                  rows="{{requestsZipped}}">
+    </google-chart>
+
+  </template>
+
+  <script>
+    Polymer('aws-errors', {
+      computed: {
+        chartOptions: '{' +
+          'title: "Errors",' +
+          'vAxes: [{viewWindow: { min: 0 }},' +
+                  '{viewWindow: { min: 0 }}],' +
+          'series: [' +
+            '{color: "#D4A839"},' +
+            '{color: "#F5745D"}' +
+          '],' +
+          'hAxis: { viewWindow: {min: startTime, max: endTime }}' +
+        '}'
+      }
+    });
+  </script>
+</polymer-element>
